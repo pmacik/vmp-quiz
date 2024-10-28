@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Summary</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Quiz Summary</h1>
+  <p>Correct: <%= summary.correct %></p>
+  <p>Incorrect: <%= summary.incorrect %></p>
+  <p>Unanswered: <%= summary.unanswered %></p>
+  <form action="/" method="get">
+    <button type="submit">Restart Quiz</button>
+  </form>
+</body>
+</html>

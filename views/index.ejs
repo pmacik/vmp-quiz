@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select Quiz</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h1>Welcome to the Quiz!</h1>
+  <form action="/start" method="post">
+    <label for="quiz">Select a Quiz:</label>
+    <select name="quiz" id="quiz" required>
+      <% quizzes.forEach(quiz => { %>
+        <option value="<%= quiz %>"><%= quiz %></option>
+      <% }); %>
+    </select>
+    <button type="submit">Start Quiz</button>
+  </form>
+</body>
+</html>

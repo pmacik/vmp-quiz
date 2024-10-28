@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Question <%= currentIndex %> of <%= total %></title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <h2>Question <%= currentIndex %> of <%= total %></h2>
+  <p><%= question.question %></p>
+  <% if (question.img) { %>
+    <img src="/images/<%= question.img %>" alt="Question Image">
+  <% } %>
+  
+  <form action="/question" method="post" style="display: inline;">
+    <% question.answers.forEach((answer, i) => { %>
+      <div>
+        <label>
+          <input type="radio" name="answerIndex" value="<%= i %>" required>
+          <%= String.fromCharCode(65 + i) %>: <%= answer.answer %>
+        </label>
+      </div>
+    <% }); %>
+    <button type="submit">Submit Answer</button>
+  </form>
+
+  <!-- Restart Quiz Form -->
+  <form action="/restart" method="post" style="display: inline;">
+    <button type="submit">Restart Quiz</button>
+  </form>
+
+  <!-- Summary Section -->
+  <section class="summary">
+    <h3>Current Summary</h3>
+    <p>Correct: <%= summary.correct %></p>
+    <p>Incorrect: <%= summary.incorrect %></p>
+    <p>Unanswered: <%= summary.unanswered %></p>
+  </section>
+</body>
+</html>

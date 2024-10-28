@@ -1,0 +1,19 @@
+{
+  "name": "kvestions",
+  "version": "1.0.0",
+  "description": "A quiz application that displays questions randomly and keeps track of correct and incorrect answers.",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ejs": "^3.1.8",
+    "js-yaml": "^4.1.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "author": "Pavel Macik <pavel.macik@gmail.com>",
+  "license": "Apache-2.0"
+}
