@@ -4,25 +4,48 @@
   <meta charset="UTF-8">
   <title>Question <%= currentIndex %> of <%= total %></title>
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    .progress-bar {
+      display: flex;
+      width: 100%;
+      height: 20px;
+      margin-bottom: 20px;
+    }
+    .progress-segment {
+      flex: 1;
+      height: 100%;
+    }
+    .correct { background-color: green; }
+    .incorrect { background-color: red; }
+    .unanswered { background-color: gray; }
+  </style>
 </head>
 <body>
+  <!-- Progress Bar -->
+  <div class="progress-bar">
+    <% for (let i = 0; i < total; i++) { %>
+      <div class="progress-segment 
+                  <%= i < currentIndex ? (summary.correct + summary.incorrect > i ? (summary.correct > i ? 'correct' : 'incorrect') : 'unanswered') : 'unanswered' %>">
+      </div>
+    <% } %>
+  </div>
+
   <h2>Question <%= currentIndex %> of <%= total %></h2>
   <p><%= question.question %></p>
   <% if (question.img) { %>
     <img src="/images/<%= question.img %>" alt="Question Image">
   <% } %>
-  
-  <form action="/question" method="post" style="display: inline;">
-    <% question.answers.forEach((answer, i) => { %>
-      <div>
-        <label>
-          <input type="radio" name="answerIndex" value="<%= i %>" required>
-          <%= String.fromCharCode(65 + i) %>: <%= answer.answer %>
-        </label>
-      </div>
-    <% }); %>
-    <button type="submit">Submit Answer</button>
-  </form>
+
+  <!-- Answer Buttons with Labels -->
+  <% question.answers.forEach((answer, i) => { %>
+    <div style="margin-bottom: 10px;">
+      <form action="/question" method="post" style="display: inline;">
+        <input type="hidden" name="answerIndex" value="<%= i %>">
+        <button type="submit"><%= String.fromCharCode(65 + i) %></button>
+      </form>
+      <span><%= answer.answer %></span>
+    </div>
+  <% }); %>
 
   <!-- Restart Quiz Form -->
   <form action="/restart" method="post" style="display: inline;">

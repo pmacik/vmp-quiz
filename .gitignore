@@ -1,5 +1,5 @@
 *.html
 *.txt
-images/**/*.jpg
+public/images/**/*.jpg
 quizzes/**/*.yaml
 node_modules
