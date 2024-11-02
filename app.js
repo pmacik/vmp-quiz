@@ -63,17 +63,22 @@ app.post("/start", (req, res) => {
   res.redirect("/question");
 });
 
-app.get("/question", (req, res) => {
+app.get('/question', (req, res) => {
   if (currentIndex >= questionOrder.length) {
-    return res.redirect("/summary");
+    return res.redirect('/summary');
   }
   const question = questions[questionOrder[currentIndex]];
-  question.answers = shuffleArray(question.answers); // Shuffle answers
-  res.render("question", {
+  question.answers = shuffleArray(question.answers);  // Shuffle answers
+
+  // Determine the correct answer index to send to the client
+  const correctAnswerIndex = question.answers.findIndex(answer => answer.correct === 'true');
+
+  res.render('question', {
     question,
+    correctAnswerIndex,
     currentIndex: currentIndex + 1,
     total: questions.length,
-    summary,
+    summary
   });
 });
 

@@ -18,7 +18,30 @@
     .correct { background-color: green; }
     .incorrect { background-color: red; }
     .unanswered { background-color: gray; }
+    .answer-btn { margin: 5px; padding: 5px 10px; }
+    .answer-btn.correct { background-color: green; color: white; }
+    .answer-btn.incorrect { background-color: red; color: white; }
   </style>
+  <script>
+    function handleAnswerClick(selectedIndex, correctIndex) {
+      // Disable all answer buttons
+      const buttons = document.querySelectorAll('.answer-btn');
+      buttons.forEach(button => button.disabled = true);
+
+      // Mark selected answer as correct or incorrect
+      if (selectedIndex === correctIndex) {
+        buttons[selectedIndex].classList.add('correct');
+      } else {
+        buttons[selectedIndex].classList.add('incorrect');
+        buttons[correctIndex].classList.add('correct');
+      }
+
+      // Wait 1 second, then submit the answer
+      setTimeout(() => {
+        document.getElementById(`answer-form-${selectedIndex}`).submit();
+      }, 1000);
+    }
+  </script>
 </head>
 <body>
   <!-- Progress Bar -->
@@ -39,11 +62,13 @@
   <!-- Answer Buttons with Labels -->
   <% question.answers.forEach((answer, i) => { %>
     <div style="margin-bottom: 10px;">
-      <form action="/question" method="post" style="display: inline;">
+      <form id="answer-form-<%= i %>" action="/question" method="post" style="display: inline;">
         <input type="hidden" name="answerIndex" value="<%= i %>">
-        <button type="submit"><%= String.fromCharCode(65 + i) %></button>
+        <button type="button" class="answer-btn" onclick="handleAnswerClick(<%= i %>, <%= correctAnswerIndex %>)">
+          <%= String.fromCharCode(65 + i) %>
+        </button>
+        <span><%= answer.answer %></span>
       </form>
-      <span><%= answer.answer %></span>
     </div>
   <% }); %>
 
