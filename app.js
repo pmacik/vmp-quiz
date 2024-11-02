@@ -1,76 +1,68 @@
-const express = require("express");
-const fs = require("fs");
-const yaml = require("js-yaml");
-const path = require("path");
-
+const express = require('express');
+const path = require('path');
+const fs = require('fs');
 const app = express();
-const PORT = 8888;
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware to serve images from the /images directory
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('view engine', 'ejs');
 
 let questions = [];
 let questionOrder = [];
 let currentIndex = 0;
 let summary = { correct: 0, incorrect: 0, unanswered: 0 };
 let server;
-let quizFile = "questions.yaml"; // Default quiz file
 
-const quizzesDir = path.join(__dirname, "quizzes"); // Directory for quiz files
+// Load quizzes from the /quizzes directory
+const loadQuizFiles = () => {
+  return fs.readdirSync('./quizzes')
+    .filter(file => file.endsWith('.yaml'))
+    .map(file => file.replace('.yaml', ''));
+};
 
-function listQuizFiles() {
-  return fs
-    .readdirSync(quizzesDir)
-    .filter((file) => file.endsWith(".yaml"))
-    .map((file) => file.replace(".yaml", "")); // Remove file extension
-}
+// Load questions based on selected filters
+const loadQuestions = (quizFile, withImages, textOnly) => {
+  const yaml = require('js-yaml');
+  const quizData = yaml.load(fs.readFileSync(`./quizzes/${quizFile}.yaml`, 'utf8'));
+  
+  // Apply filters for questions with images and text-only questions
+  questions = quizData.questions.filter(q => {
+    if (withImages && textOnly) return true;
+    if (withImages) return !!q.img;
+    if (textOnly) return !q.img;
+  });
 
-function loadQuestions(quizFileName) {
-  try {
-    const filePath = path.join(quizzesDir, `${quizFileName}.yaml`);
-    const fileContents = fs.readFileSync(filePath, "utf8");
-    const data = yaml.load(fileContents);
-    questions = data.questions;
-    resetQuiz();
-  } catch (e) {
-    console.error(`Failed to load quiz file ${quizFileName}.yaml`, e);
-  }
-}
-
-function resetQuiz() {
-  questionOrder = [...Array(questions.length).keys()].sort(
-    () => Math.random() - 0.5
-  );
-  currentIndex = 0;
+  questionOrder = Array.from({ length: questions.length }, (_, i) => i);
+  shuffleArray(questionOrder);
   summary = { correct: 0, incorrect: 0, unanswered: questions.length };
-}
+};
 
-function shuffleArray(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
+// Shuffle array function (used for questions and answers)
+const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
 
-app.set("view engine", "ejs");
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.urlencoded({ extended: true }));
-app.use('/images', express.static(path.join(__dirname, 'images')));
-
-
-app.get("/", (req, res) => {
-  const quizzes = listQuizFiles();
-  res.render("index", { quizzes });
+app.get('/', (req, res) => {
+  const quizzes = loadQuizFiles();
+  res.render('selectQuiz', { quizzes });
 });
 
-app.post("/start", (req, res) => {
-  quizFile = req.body.quiz;
-  loadQuestions(quizFile);
-  res.redirect("/question");
+app.post('/start', (req, res) => {
+  const { quiz, withImages, textOnly } = req.body;
+  loadQuestions(quiz, withImages === 'on', textOnly === 'on');
+  currentIndex = 0;
+  res.redirect('/question');
 });
 
+// Route to render each question
 app.get('/question', (req, res) => {
   if (currentIndex >= questionOrder.length) {
     return res.redirect('/summary');
   }
   const question = questions[questionOrder[currentIndex]];
-  question.answers = shuffleArray(question.answers);  // Shuffle answers
+  question.answers = shuffleArray(question.answers);
 
-  // Determine the correct answer index to send to the client
+  // Determine the correct answer index for color indication on the client side
   const correctAnswerIndex = question.answers.findIndex(answer => answer.correct === 'true');
 
   res.render('question', {
@@ -82,34 +74,37 @@ app.get('/question', (req, res) => {
   });
 });
 
-app.post("/question", (req, res) => {
-  const { answerIndex } = req.body;
+// Handle answer submission
+app.post('/question', (req, res) => {
+  const selectedAnswerIndex = parseInt(req.body.answerIndex, 10);
   const question = questions[questionOrder[currentIndex]];
-  const isCorrect = question.answers[answerIndex].correct === "true";
+  const isCorrect = question.answers[selectedAnswerIndex].correct === 'true';
 
-  if (isCorrect) {
-    summary.correct++;
-  } else {
-    summary.incorrect++;
-  }
+  // Update summary based on whether the answer was correct or not
+  if (isCorrect) summary.correct++;
+  else summary.incorrect++;
+
   summary.unanswered--;
   currentIndex++;
-  res.redirect("/question");
+  res.redirect('/question');
 });
 
-app.get("/summary", (req, res) => {
-  res.render("summary", { summary });
+// Handle restart
+app.post('/restart', (req, res) => {
+  currentIndex = 0;
+  summary = { correct: 0, incorrect: 0, unanswered: questions.length };
+  res.redirect('/');
 });
 
-app.post("/restart", (req, res) => {
-  resetQuiz(); // Reset the quiz state
-  loadQuestions(quizFile); // Reload the questions from the current quiz file
-  res.redirect("/question");
+app.get('/summary', (req, res) => {
+  res.render('summary', { summary });
 });
 
+const PORT = 8888;
 server = app.listen(PORT, () => {
-  console.log(`App running on http://localhost:${PORT}`);
+  console.log(`Quiz app running on http://localhost:${PORT}`);
 });
+
 
 // Graceful shutdown on CTRL+C
 process.on("SIGINT", () => {

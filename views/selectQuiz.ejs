@@ -3,17 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <title>Select Quiz</title>
-  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-  <h1>Welcome to the Quiz!</h1>
+  <h2>Select a Quiz</h2>
   <form action="/start" method="post">
-    <label for="quiz">Select a Quiz:</label>
+    <label for="quiz">Choose a quiz:</label>
     <select name="quiz" id="quiz" required>
       <% quizzes.forEach(quiz => { %>
         <option value="<%= quiz %>"><%= quiz %></option>
       <% }); %>
     </select>
+    
+    <!-- Filter Checkboxes -->
+    <div>
+      <label>
+        <input type="checkbox" name="withImages" checked>
+        Questions with Images
+      </label>
+    </div>
+    <div>
+      <label>
+        <input type="checkbox" name="textOnly" checked>
+        Text Questions
+      </label>
+    </div>
+    
     <button type="submit">Start Quiz</button>
   </form>
 </body>

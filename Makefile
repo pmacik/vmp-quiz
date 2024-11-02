@@ -25,3 +25,7 @@ clean:
 .PHONY: run
 run:
 	podman run -it --rm -p 8888:8888 quay.io/pmacik/vmp-quiz:$(VERSION)
+
+.PHONY: publish-image
+publish-image: push-image
+	podman push quay.io/pmacik/vmp-quiz:latest
