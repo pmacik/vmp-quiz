@@ -2,10 +2,15 @@ FROM node:16 as builder
 
 WORKDIR /app
 
-COPY package*.json ./
-COPY . .
+COPY Makefile .
+COPY generate-yamls-from-html.sh .
+COPY public public
+COPY quizzes quizzes
 
 RUN make get-resources
+
+COPY . .
+
 RUN npm install
 
 FROM node:16-slim as runner

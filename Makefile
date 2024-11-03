@@ -11,7 +11,7 @@ setup-nvm:
 
 .PHONY: build-image
 build-image:
-	podman build -t quay.io/pmacik/vmp-quiz:$(VERSION) . 
+	podman build -t quay.io/pmacik/vmp-quiz:$(VERSION) .
 
 .PHONY: push-image
 push-image:
@@ -28,4 +28,5 @@ run:
 
 .PHONY: publish-image
 publish-image: push-image
+	podman tag quay.io/pmacik/vmp-quiz:$(VERSION) quay.io/pmacik/vmp-quiz:latest
 	podman push quay.io/pmacik/vmp-quiz:latest

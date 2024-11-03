@@ -12,7 +12,7 @@ app.set('view engine', 'ejs');
 let questions = [];
 let questionOrder = [];
 let currentIndex = 0;
-let summary = { correct: 0, incorrect: 0, unanswered: 0 };
+let summary = { correct: 0, successRate: 0.0, incorrect: 0, unanswered: 0 };
 let server;
 
 // Load quizzes from the /quizzes directory
@@ -26,7 +26,7 @@ const loadQuizFiles = () => {
 const loadQuestions = (quizFile, withImages, textOnly) => {
   const yaml = require('js-yaml');
   const quizData = yaml.load(fs.readFileSync(`./quizzes/${quizFile}.yaml`, 'utf8'));
-  
+
   // Apply filters for questions with images and text-only questions
   questions = quizData.questions.filter(q => {
     if (withImages && textOnly) return true;
@@ -36,7 +36,7 @@ const loadQuestions = (quizFile, withImages, textOnly) => {
 
   questionOrder = Array.from({ length: questions.length }, (_, i) => i);
   shuffleArray(questionOrder);
-  summary = { correct: 0, incorrect: 0, unanswered: questions.length };
+  summary = { correct: 0, successRate: 0.0, incorrect: 0, unanswered: questions.length };
 };
 
 // Shuffle array function (used for questions and answers)
@@ -81,8 +81,13 @@ app.post('/question', (req, res) => {
   const isCorrect = question.answers[selectedAnswerIndex].correct === 'true';
 
   // Update summary based on whether the answer was correct or not
-  if (isCorrect) summary.correct++;
-  else summary.incorrect++;
+  if (isCorrect) {
+    summary.correct++;
+  } else {
+    summary.incorrect++;
+  }
+
+  summary.successRate = (summary.correct / (summary.correct + summary.incorrect) * 100).toFixed(2);
 
   summary.unanswered--;
   currentIndex++;
@@ -92,7 +97,7 @@ app.post('/question', (req, res) => {
 // Handle restart
 app.post('/restart', (req, res) => {
   currentIndex = 0;
-  summary = { correct: 0, incorrect: 0, unanswered: questions.length };
+  summary = { correct: 0, successRate: 0.0, incorrect: 0, unanswered: questions.length };
   res.redirect('/');
 });
 

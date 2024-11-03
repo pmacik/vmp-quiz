@@ -31,16 +31,14 @@
       // Mark selected answer as correct or incorrect
       if (selectedIndex === correctIndex) {
         buttons[selectedIndex].classList.add('correct');
+        setTimeout(() => document.getElementById('answer-form-' + selectedIndex).submit(), 500);
       } else {
         buttons[selectedIndex].classList.add('incorrect');
         buttons[correctIndex].classList.add('correct');
+        setTimeout(() => document.getElementById('answer-form-' + selectedIndex).submit(), 3000);
       }
-
-      // Wait 1 second, then submit the answer
-      setTimeout(() => {
-        document.getElementById(`answer-form-${selectedIndex}`).submit();
-      }, 500);
     }
+
   </script>
 </head>
 <body>
@@ -80,7 +78,7 @@
   <!-- Summary Section -->
   <section class="summary">
     <h3>Current Summary</h3>
-    <p>Correct: <%= summary.correct %></p>
+    <p>Correct: <%= summary.correct %> (<%= summary.successRate %>%)</p>
     <p>Incorrect: <%= summary.incorrect %></p>
     <p>Unanswered: <%= summary.unanswered %></p>
   </section>
