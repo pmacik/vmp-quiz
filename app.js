@@ -31,7 +31,7 @@ const loadQuestions = (quizFile, withImages, textOnly) => {
   questions = quizData.questions.filter(q => {
     if (withImages && textOnly) return true;
     if (withImages) return q.img != "" || q.answers.some(answer => answer.img != "");
-    if (textOnly) return !q.img;
+    if (textOnly) return !q.img && q.answers.every(answer => !answer.img);
   });
 
   questionOrder = Array.from({ length: questions.length }, (_, i) => i);
