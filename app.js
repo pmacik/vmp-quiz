@@ -30,7 +30,7 @@ const loadQuestions = (quizFile, withImages, textOnly) => {
   // Apply filters for questions with images and text-only questions
   questions = quizData.questions.filter(q => {
     if (withImages && textOnly) return true;
-    if (withImages) return !!q.img;
+    if (withImages) return q.img != "" || q.answers.some(answer => answer.img != "");
     if (textOnly) return !q.img;
   });
 

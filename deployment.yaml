@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vmp-quiz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vmp-quiz
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vmp-quiz
+    spec:
+      containers:
+        - image: quay.io/pmacik/vmp-quiz:latest
+          imagePullPolicy: Always
+          name: vmp-quiz
+          ports:
+            - containerPort: 8888
+              name: vmp-quiz
+              protocol: TCP
+          resources: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vmp-quiz
+spec:
+  ports:
+    - name: vmp-quiz
+      port: 8888
+      protocol: TCP
+      targetPort: vmp-quiz
+  selector:
+    app.kubernetes.io/name: vmp-quiz
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: vmp-quiz
+spec:
+  path: /
+  port:
+    targetPort: 8888
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: vmp-quiz
+    weight: 100
+  wildcardPolicy: None

@@ -65,6 +65,9 @@
         <button type="button" class="answer-btn" onclick="handleAnswerClick(<%= i %>, <%= correctAnswerIndex %>)">
           <%= String.fromCharCode(65 + i) %>
         </button>
+        <% if (answer.img) { %>
+          <img src="/images/<%= answer.img %>" alt="Answer Image">
+        <% } %>
         <span><%= answer.answer %></span>
       </form>
     </div>

@@ -21,28 +21,27 @@ grep -E 'tázka|dpověď' "$html" | sed -e 's,.*<th .*>.*\(\( \?.tázka\|.dpově
 {
     echo "questions:"
     for i in $(seq 1 $(wc -l <"$id.txt")); do
+        line="$(sed -n "${i}p" "$id.txt" | tr -d '\r\n')"
+        IFS=";" read -r -a tokens <<<"$line"
+        text="${tokens[0]}"
+        if [ -z "${tokens[1]}" ]; then
+            img=""
+        else
+            img="$id/$(basename "${tokens[1]}")"
+        fi
         if [ $((i % 4)) -eq 1 ]; then
-            IFS=";" read -r -a tokens <<<"$(sed -n "${i}p" "$id.txt" | tr -d '\r\n')"
-            echo "- question: '${tokens[0]}'"
-            if [ -z "${tokens[1]}" ]; then
-                img=""
-            else
-                img="$id/$(basename "${tokens[1]}")"
-            fi
+            echo "- question: '$text'"
             echo "  img: '$img'"
             echo "  answers:"
         elif [ $((i % 4)) -eq 2 ]; then
-            line="$(sed -n "${i}p" "$id.txt" | tr -d '\r\n')"
-            echo "  - answer: '${line%;}'"
+            echo "  - answer: '$text'"
             echo "    correct: 'true'"
-        elif [ $((i % 4)) -eq 3 ]; then
-            line="$(sed -n "${i}p" "$id.txt" | tr -d '\r\n')"
-            echo "  - answer: '${line%;}'"
-            echo "    correct: 'false'"
+            echo "    img: '$img'"
         else
             line="$(sed -n "${i}p" "$id.txt" | tr -d '\r\n')"
-            echo "  - answer: '${line%;}'"
+            echo "  - answer: '$text'"
             echo "    correct: 'false'"
+            echo "    img: '$img'"
         fi
     done
 } >quizzes/$id.yaml
