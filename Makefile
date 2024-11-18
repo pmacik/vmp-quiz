@@ -1,4 +1,5 @@
 VERSION?=latest
+OPENSIFT_NAMESPACE?=vmp-quiz
 
 .PHONY: get-resources
 get-resources:
@@ -30,3 +31,21 @@ run:
 publish-image: push-image
 	podman tag quay.io/pmacik/vmp-quiz:$(VERSION) quay.io/pmacik/vmp-quiz:latest
 	podman push quay.io/pmacik/vmp-quiz:latest
+
+.PHONY: deploy
+deploy:
+	kubectl create namespace "${OPENSIFT_NAMESPACE}" --dry-run=client -o yaml | kubectl apply -f -
+	kubectl -n $(OPENSIFT_NAMESPACE) apply -f deployment.yaml
+	kubectl wait pods -n $(OPENSIFT_NAMESPACE) -l app.kubernetes.io/name=vmp-quiz --for condition=Available --timeout=90s
+	@echo 
+	@echo "Open https://$$(kubectl -n $(OPENSIFT_NAMESPACE) get routes.route.openshift.io vmp-quiz -o json | jq -rc '.status.ingress[0].host')"
+
+.PHONY: restart
+restart:
+	kubectl -n $(OPENSIFT_NAMESPACE) rollout restart deployment/vmp-quiz
+	kubectl -n $(OPENSIFT_NAMESPACE) wait deployment/vmp-quiz --for condition=Available --timeout=90s
+
+.PHONY: undeploy
+undeploy:
+	kubectl -n $(OPENSIFT_NAMESPACE) delete -f deployment.yaml --ignore-not-found=true --wait
+	kubectl delete namespace $(OPENSIFT_NAMESPACE) --wait
